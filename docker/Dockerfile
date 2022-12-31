@@ -64,14 +64,14 @@ RUN TORCH_VER=$(curl --silent --location https://pypi.org/pypi/torch/json | pyth
             python -m pip install --no-cache-dir torch==$TORCH_VER+$CUDA_VERSION torchvision==$TORCH_VISION_VER+$CUDA_VERSION -f https://download.pytorch.org/whl/torch_stable.html; \
         # Install the binary with the latest CUDA version support
         else \
-            python -m pip install --no-cache-dir torch torchvision; \
+            python -m pip install --no-cache-dir torch torchvision sklearn; \
         fi; \
         python -m pip install --no-cache-dir -r https://raw.githubusercontent.com/pytorch/serve/master/requirements/common.txt; \
     # Install the CPU binary
     else \
         python -m pip install --no-cache-dir torch==$TORCH_VER+cpu torchvision==$TORCH_VISION_VER+cpu -f https://download.pytorch.org/whl/torch_stable.html; \
     fi
-RUN python -m pip install -U setuptools && python -m pip install --no-cache-dir captum torchtext torchserve torch-model-archiver
+RUN python -m pip install -U setuptools && python -m pip install --no-cache-dir captum torchtext torchserve torch-model-archiver sklearn transformers
 
 # Final image for production
 FROM ${BASE_IMAGE} AS runtime-image
@@ -105,7 +105,7 @@ RUN chmod +x /usr/local/bin/dockerd-entrypoint.sh \
 
 COPY config.properties /home/model-server/config.properties
 RUN mkdir /home/model-server/model-store && chown -R model-server /home/model-server/model-store
-
+RUN wget https://gitlab.com/zhuofan-16/model/-/raw/main/BERTJob.mar -O /home/model-server/model-store/BERTJob.mar
 EXPOSE 8080 8081 8082 7070 7071
 
 USER model-server
